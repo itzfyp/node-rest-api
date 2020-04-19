@@ -3,6 +3,7 @@ const path = require('path');
 const { validationResult } = require('express-validator/check');
 const Post = require('../models/post');
 const User = require('../models/user');
+const { setexJson, deleteKeysWithPattern } = require('../core/cache');
 
 exports.getPosts = (req, res, next) => {
 
@@ -17,7 +18,9 @@ exports.getPosts = (req, res, next) => {
             return Post.find().skip((currentPage - 1) * perPage).limit(perPage);
         })
         .then(posts => {
-            res.status(200).json({ message: 'fetched Posts successfully', posts, totalItems });
+            const response = { message: 'fetched Posts successfully', posts, totalItems };
+            setexJson(req.userId + ":" + req.originalUrl, response);
+            res.status(200).json(response);
         })
         .catch(err => {
             if (!err.statusCode) {
@@ -65,6 +68,7 @@ exports.createPost = (req, res, next) => {
             return user.save();
         })
         .then(result => {
+            deleteKeysWithPattern('/feed/posts*');
             res.status(201).json({
                 message: 'Post creates successfully',
                 post: post,
@@ -80,8 +84,6 @@ exports.createPost = (req, res, next) => {
             }
             next(err);
         });
-
-
 };
 
 
@@ -95,7 +97,9 @@ exports.getPost = (req, res, next) => {
                 error.statusCode = 404;
                 throw error;
             }
-            res.status(200).json({ message: 'Post fetched', post });
+            const response = { message: 'Post fetched', post };
+            setexJson(req.userId + ":" + req.originalUrl, response);
+            res.status(200).json(response);
         })
         .catch(err => {
             if (!err.statusCode) {
@@ -150,6 +154,7 @@ exports.updatePost = (req, res, next) => {
             return post.save();
         })
         .then(result => {
+            deleteKeysWithPattern('/feed/posts*');
             res.status(200).json({ message: 'post updated', post: result });
         })
         .catch(err => {
@@ -190,6 +195,7 @@ exports.deletePost = (req, res, next) => {
         })
         .then(result => {
             console.log(result);
+            deleteKeysWithPattern('/feed/posts*');
             res.status(200).json({ message: 'post deleted successfully' });
         })
         .catch(err => {

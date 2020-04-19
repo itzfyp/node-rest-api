@@ -3,6 +3,7 @@ const bCrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
+const { deleteKeysWithPattern } = require('../core/cache');
 
 exports.signup = (req, res, next) => {
     const errors = validationResult(req);
@@ -67,6 +68,8 @@ exports.login = (req, res, next) => {
                 error.statusCode = 401;
                 throw error;
             }
+
+            deleteKeysWithPattern(`${loaderUser._id.toString()}*`);
 
             const token = jwt.sign(
                 {

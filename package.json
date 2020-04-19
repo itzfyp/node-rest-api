@@ -30,6 +30,8 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.9.9",
     "multer": "^1.4.2",
+    "redis": "^3.0.2",
+    "redis-delete-pattern": "^0.1.0",
     "uuid": "^7.0.3"
   },
   "devDependencies": {
